@@ -15,6 +15,8 @@ class CreateTransactionsTable extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('store_id');
+            $table->foreignId('order_id');
             $table->timestamps();
         });
     }

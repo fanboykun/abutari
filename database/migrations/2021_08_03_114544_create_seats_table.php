@@ -15,6 +15,9 @@ class CreateSeatsTable extends Migration
     {
         Schema::create('seats', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('store_id');
+            $table->integer('number');
+            $table->boolean('is_empty')->default(true);
             $table->timestamps();
         });
     }

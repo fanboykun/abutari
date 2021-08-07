@@ -15,6 +15,9 @@ class CreateKitchensTable extends Migration
     {
         Schema::create('kitchens', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('store_id');
+            $table->foreignId('order_id');
+            $table->boolean('is_served')->default(false);
             $table->timestamps();
         });
     }

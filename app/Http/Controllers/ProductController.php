@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Actions\Product\CreatesNewProduct;
+use App\Actions\Product\DeletesProduct;
+use App\Actions\Product\GetsAllProduct;
+use App\Actions\Product\ShowsProduct;
+use App\Actions\Product\UpdatesProduct;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Traits\MediaUploadingTrait;
-use App\Http\Requests\StoreProductRequest;
-use App\Http\Requests\UpdateProductRequest;
+// use App\Http\Controllers\Traits\MediaUploadingTrait;
+use App\Http\Requests\Product\StoreProductRequest;
+use App\Http\Requests\Product\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Support\Facades\Gate;
@@ -14,62 +18,47 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ProductController extends Controller
 {
-    use MediaUploadingTrait;
+    // use MediaUploadingTrait;
 
-    public function index()
+    public function index(GetsAllProduct $action)
     {
-        abort_if(Gate::denies('product_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-
-        return new ProductResource(Product::with(['categories'])->get());
+        // abort_if(Gate::denies('product_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $products = $action->getall();
+        return new ProductResource($products);
     }
 
-    public function store(StoreProductRequest $request)
+    public function store(StoreProductRequest $request, CreatesNewProduct $action)
     {
-        $product = Product::create($request->all());
-        $product->categories()->sync($request->input('categories', []));
-        $product->tags()->sync($request->input('tags', []));
-        if ($request->input('photo', false)) {
-            $product->addMedia(storage_path('tmp/uploads/' . basename($request->input('photo'))))->toMediaCollection('photo');
-        }
+        $product = $action->store($request->all());
 
         return (new ProductResource($product))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
-    public function show(Product $product)
+    public function show(Product $product, ShowsProduct $action)
     {
-        abort_if(Gate::denies('product_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        // abort_if(Gate::denies('product_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $product = $action->show($product);
 
-        return new ProductResource($product->load(['categories', 'tags']));
+        return new ProductResource($product);
     }
 
-    public function update(UpdateProductRequest $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product, UpdatesProduct $action)
     {
-        $product->update($request->all());
-        $product->categories()->sync($request->input('categories', []));
-        $product->tags()->sync($request->input('tags', []));
-        if ($request->input('photo', false)) {
-            if (!$product->photo || $request->input('photo') !== $product->photo->file_name) {
-                if ($product->photo) {
-                    $product->photo->delete();
-                }
-                $product->addMedia(storage_path('tmp/uploads/' . basename($request->input('photo'))))->toMediaCollection('photo');
-            }
-        } elseif ($product->photo) {
-            $product->photo->delete();
-        }
+        $data = $request->all();
+        $product = $action->update($product, $data);
 
         return (new ProductResource($product))
         ->response()
         ->setStatusCode(Response::HTTP_ACCEPTED);
     }
 
-    public function destroy(Product $product)
+    public function destroy(Product $product, DeletesProduct $action)
     {
-        abort_if(Gate::denies('product_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        // abort_if(Gate::denies('product_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $product->delete();
+        $action->destroy($product);
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

@@ -15,6 +15,9 @@ class CreateIncomesTable extends Migration
     {
         Schema::create('incomes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('store_id');
+            $table->foreignId('transaction_id');
+            $table->double('total');
             $table->timestamps();
         });
     }

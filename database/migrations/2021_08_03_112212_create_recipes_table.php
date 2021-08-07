@@ -15,6 +15,10 @@ class CreateRecipesTable extends Migration
     {
         Schema::create('recipes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('store_id');
+            $table->string('title');
+            $table->string('description')->nullable();
+            $table->foreignId('product_id')->cascadeOnDelete();
             $table->timestamps();
         });
     }

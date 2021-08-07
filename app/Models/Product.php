@@ -17,9 +17,9 @@ class Product extends Model
 
     public $table = 'products';
 
-    protected $appends = [
-        'photo',
-    ];
+    // protected $appends = [
+    //     'photo',
+    // ];
 
     protected $dates = [
         'created_at',
@@ -27,40 +27,69 @@ class Product extends Model
         'deleted_at',
     ];
 
+
     protected $fillable = [
+        'store_id',
         'name',
-        'description',
         'price',
+        'description',
+        'category_id',
         'created_at',
         'updated_at',
-        'deleted_at',
     ];
+    // protected $fillable = [
+    //     'name',
+    //     'description',
+    //     'price',
+    //     'created_at',
+    //     'updated_at',
+    //     'deleted_at',
+    // ];
 
-    public function registerMediaConversions(Media $media = null): void
-    {
-        $this->addMediaConversion('thumb')->fit('crop', 50, 50);
-        $this->addMediaConversion('preview')->fit('crop', 120, 120);
-    }
+    // public function registerMediaConversions(Media $media = null): void
+    // {
+    //     $this->addMediaConversion('thumb')->fit('crop', 50, 50);
+    //     $this->addMediaConversion('preview')->fit('crop', 120, 120);
+    // }
 
     public function categories()
     {
         return $this->belongsTo(ProductCategory::class);
     }
 
-    public function getPhotoAttribute()
-    {
-        $file = $this->getMedia('photo')->last();
-        if ($file) {
-            $file->url       = $file->getUrl();
-            $file->thumbnail = $file->getUrl('thumb');
-            $file->preview   = $file->getUrl('preview');
-        }
+    // public function getPhotoAttribute()
+    // {
+    //     $file = $this->getMedia('photo')->last();
+    //     if ($file) {
+    //         $file->url       = $file->getUrl();
+    //         $file->thumbnail = $file->getUrl('thumb');
+    //         $file->preview   = $file->getUrl('preview');
+    //     }
 
-        return $file;
-    }
+    //     return $file;
+    // }
 
     protected function serializeDate(DateTimeInterface $date)
     {
         return $date->format('Y-m-d H:i:s');
     }
+    public function store()
+    {
+        return $this->belongsTo(Store::class);
+    }
+
+    public function carts()
+    {
+        return $this->belongsToMany(Cart::class)->withPivot('quantity', 'amount_price');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    // public function recipe()
+    // {
+    //     return $this->hasOne(Recipe::class);
+    // }
 }

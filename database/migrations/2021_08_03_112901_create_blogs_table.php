@@ -15,6 +15,11 @@ class CreateBlogsTable extends Migration
     {
         Schema::create('blogs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('store_id');
+            $table->string('title')->required();
+            $table->string('slug')->required();
+            $table->string('thumbnail')->nullable();
+            $table->longText('content')->required() ;
             $table->timestamps();
         });
     }
